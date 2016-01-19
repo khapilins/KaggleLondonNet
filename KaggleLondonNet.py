@@ -18,7 +18,7 @@ for line in y:
     else:
         ys.append(np.array([1,0]).reshape((2,1)))
 
-train_data=[(fcns.norm(tx),ty) for tx,ty in zip(xs,ys)]
+train_data=[(tx,ty) for tx,ty in zip(xs,ys)]
 
 f3=open('test.csv','r')
 ts=[]
@@ -44,12 +44,6 @@ a[1].plot(n.validation_costs)
 a[1].plot(n.train_costs)
 
 print "Expecting accuracy %s"%n.accuracy(test)
-
-print "creating train labels csv"
-f=open('trLabels.csv','w')
-for x in train_data:
-    f.write(str(n.predict(x[0]))+'\n')    
-f.close()
 
 print 'creating test labels csv'
 f=open('testLabels.csv','w')

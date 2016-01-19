@@ -7,7 +7,7 @@ class net:
     weights = []
     biases = []
     num_of_layers = 0
-    eta = 0.2      
+    eta = 0.1      
     lda = 2.5
 
     accuracies=[]
@@ -42,7 +42,8 @@ class net:
     def SGD(self, training_data,test_data,
             epochs,
             mini_batch_size=1,            
-            validation_data=None):
+            validation_data=None,
+            filename_to_save=''):
         """training data is represented as tuple (x,y)"""
         
         n = len(training_data)  
@@ -64,27 +65,14 @@ class net:
                 self.validation_accuracies.append(self.accuracy(validation_data))
                 print "Validation accuracy %s"%self.validation_accuracies[-1]
                 self.validation_costs.append(self.total_cost(validation_data))
-
-            if not validation_data:
-                self.accuracies.append(self.accuracy(test_data))
-                if self.accuracies[-1]>self.best_net_accuracy:
-                    self.best_net_accuracy=self.accuracies[-1]
-                    self.best_net=self.copy_net_to(self.best_net)
-                    stop_counter=0
-                else: stop_counter=stop_counter+1
-            else:
-                if self.validation_accuracies[-1]>self.best_net_accuracy:
-                    self.best_net_accuracy=self.validation_accuracies[-1]
-                    self.best_net=self.copy_net_to(self.best_net)
-                    stop_counter=0                    
-                else: stop_counter=stop_counter+1
+            
             self.train_accuracies.append(self.accuracy(training_data))
             self.train_costs.append(self.total_cost(training_data))
             
             if self.train_accuracies[-1]>0.998:
                 break
                     
-        self.save()               
+        self.save(filename_to_save)               
                      
     def cross_validate(self,training_data,test_data,epochs, k=3):
         l=len(training_data)
@@ -161,13 +149,12 @@ class net:
         copy_to_net.best_net_accuracy=self.best_net_accuracy
         return copy_to_net
 
-    def save(self):
+    def save(self,filename=''):
         """Saving net to json"""
-        f=open(str(self.best_net_accuracy)+'_best_net.json','wb')
+        f=open(filename+'_net.json','wb')
         data={'sizes':self.sizes,
               'weights':[w.tolist() for w in self.weights],
-              'biases':[b.tolist() for b in self.biases],
-              'best_net_accuracy':self.best_net_accuracy}
+              'biases':[b.tolist() for b in self.biases]}
         json.dump(data,f)
         f.close()
 
@@ -179,8 +166,7 @@ class net:
         n=net([])
         n.sizes=data['sizes']
         n.weights=[np.array(w) for w in data['weights']]
-        n.biases=[np.array(b) for b in data['biases']]
-        n.best_net_accuracy=data['best_net_accuracy']
+        n.biases=[np.array(b) for b in data['biases']]        
         return n
 
     @staticmethod
